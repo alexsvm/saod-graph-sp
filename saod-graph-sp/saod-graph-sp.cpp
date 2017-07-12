@@ -19,6 +19,13 @@ public:
 		bool operator < (const Node & second) { return index < second.index; }; // Оператор < сравнения вершин по номеру
 		bool operator == (const Node & second) { return index == second.index; }; // Оператор == сравнения вершин по номеру
 		using Ptr = shared_ptr<Node>;
+		struct Comparator
+		{
+			bool operator() (const Ptr &lhs, const Ptr &rhs) const
+			{
+				return lhs->index < rhs->index;
+			}
+		};
 	};
 
 	class Verge {
@@ -38,17 +45,55 @@ public:
 				&& B->index == second.B->index;
 		};
 		using Ptr = shared_ptr<Verge>;
+		struct Comparator
+		{
+			bool operator() (const Ptr &lhs, const Ptr &rhs) const
+			{
+				return (lhs->A->index < rhs->A->index)
+					|| (lhs->A->index == rhs->A->index
+						&& lhs->B->index < rhs->B->index);
+			};
+		};
 	};
 
 	class Nodes {
 	private:
-		list<Node> _nodes;
+		list<Node::Ptr> _nodes;
 	public:
 		~Nodes() { _nodes.clear(); };
-		bool Add(int idx);
-		Node::Ptr Get(int idx);
-		bool Del(int idx);
-		void Print();
+		Node::Ptr Get(int idx) {
+			Node::Ptr p;
+			for (auto& it : _nodes)
+				if ((*it).index == idx) {
+					p = it;
+					return p;
+				};
+			return p;
+		};
+
+		bool Add(int idx, double weight = 0) {
+			if (Get(idx))
+				return false;
+			_nodes.push_back(make_shared<Node>(idx, weight));
+			_nodes.sort(Node::Comparator());
+			return true;
+		};
+		
+		bool Del(int idx) {
+			for (auto it : _nodes) {
+				if ((*it).index == idx) {
+					_nodes.remove(it);
+					return true;
+				};
+			};
+			return false;
+		};
+
+		void Print() {
+			for (const auto &it : _nodes)
+				cout << it->index << "(" << it->weight << ")\t";
+			cout << endl;
+		};
 	};
 
 	class Verges {
@@ -68,18 +113,31 @@ public:
 	void *operator new(std::size_t) = delete; // Удаляем операторы new
 	void *operator new[](std::size_t) = delete; //
 
+	Nodes nodes;
+	Verges verges;
+
+
 };
 
 
 
 int main()
 {
+	Graph G;
 
-	Graph::Node::Ptr ps;
+	G.nodes.Add(3);
+	G.nodes.Add(1);
+	G.nodes.Add(1);
+	G.nodes.Add(5);
+	G.nodes.Add(2);
+	G.nodes.Del(2);
+
+	G.nodes.Print();
 
 
 
-
-    //return 0;
+	// The end
+	cout << endl << "\n\nEnter x to exit...";
+	cin.get();
 }
 
