@@ -33,8 +33,7 @@ public:
 		Node::Ptr A; // Указатель на первую вершину
 		Node::Ptr B; // Указатель на вторую вершину
 		double verge_weight; // Вес ребра
-		Verge(Node::Ptr A, Node::Ptr B, double weight) : A(A), B(B), verge_weight(weight) { }; // Конструктор
-//verge(int A, int B, double weight) : node_A(make_shared<node>(new node(A))), node_B(make_shared<node>(new node(B))), verge_weight(weight) { }; // Конструктор
+		Verge(Node::Ptr A, Node::Ptr B, double weight = 0) : A(A), B(B), verge_weight(weight) { }; // Конструктор
 		bool operator < (const Verge & second) {
 			return (A->index < second.A->index)
 				|| (A->index == second.A->index
@@ -58,18 +57,33 @@ public:
 
 	class Nodes {
 	private:
+		Graph *owner;
 		list<Node::Ptr> _nodes;
 	public:
+		Nodes(Graph *owner): owner(owner) {};
 		~Nodes() { _nodes.clear(); };
-		Node::Ptr Get(int idx) {
+		
+		Node::Ptr Get(int idx) { 
 			Node::Ptr p;
-			for (auto& it : _nodes)
+			for (auto &it : _nodes)
 				if ((*it).index == idx) {
 					p = it;
 					return p;
 				};
 			return p;
-		};
+		}
+
+		//Node::Ptr operator[](int idx) {
+		Node::Ptr operator()(int idx) { 
+			Node::Ptr sp = Get(idx);
+			if (!sp) {
+				sp.reset(new Node {idx});
+				_nodes.push_back(sp);
+				_nodes.sort(Node::Comparator());
+			}
+			return sp; 
+		}
+
 
 		bool Add(int idx, double weight = 0) {
 			if (Get(idx))
@@ -77,34 +91,84 @@ public:
 			_nodes.push_back(make_shared<Node>(idx, weight));
 			_nodes.sort(Node::Comparator());
 			return true;
-		};
+		}
 		
 		bool Del(int idx) {
-			for (auto it : _nodes) {
-				if ((*it).index == idx) {
+			if (owner->verges.IsNodeIncluded(idx))
+				return false;
+			for (auto &it : _nodes) 
+				if (it->index == idx) {
 					_nodes.remove(it);
 					return true;
-				};
-			};
+				}
 			return false;
-		};
+		}
 
 		void Print() {
 			for (const auto &it : _nodes)
 				cout << it->index << "(" << it->weight << ")\t";
 			cout << endl;
-		};
+		}
 	};
 
 	class Verges {
 	private:
-		list<Verge> _verges;
+		list<Verge::Ptr> _verges;
+		Graph *owner;
 	public:
+		Verges(Graph *owner) : owner(owner) {};
 		~Verges() { _verges.clear(); };
-		bool Add(int A_idx, int B_idx);
-		Verge::Ptr Get(int A_idx, int B_idx);
-		bool Del(int A_idx, int B_idx);
-		void Print();
+		
+		bool Add(int A_idx, int B_idx, double weight = 0) {
+			Node::Ptr sp_A = owner->nodes(A_idx);
+			Node::Ptr sp_B = owner->nodes(B_idx);
+			_verges.push_back(make_shared<Verge>(sp_A, sp_B, weight));
+			_verges.sort(Verge::Comparator());
+			return true; //????????????????????????????????????????
+		}
+
+		Verge::Ptr Get(int A_idx, int B_idx) {
+			Verge::Ptr sp;
+			for (const auto &it : _verges) {
+				if (it->A->index == A_idx && it->B->index == B_idx)
+					sp = it;
+			}
+			return sp;
+		}
+
+		Verge::Ptr operator()(int A_idx, int B_idx) {
+			Verge::Ptr sp = Get(A_idx, B_idx);
+			if (!sp) {
+				sp.reset(new Verge { owner->nodes(A_idx), owner->nodes(B_idx) });
+				_verges.push_back(sp);
+				_verges.sort(Verge::Comparator());
+			}
+			return sp;
+		}
+
+
+		bool Del(int A_idx, int B_idx) {
+			for (auto &it : _verges) {
+				if (it->A->index == A_idx && it->B->index == B_idx) {
+					_verges.remove(it);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool IsNodeIncluded(int idx) {
+			for (auto &it : _verges)
+				if (it->A->index == idx || it->B->index == idx)
+					return true;
+			return false;
+		}
+
+		void Print() {
+			for (const auto &it : _verges)
+				cout << "(" << it->A->index << ")-(" << it->B->index << ")[" << it->verge_weight << "]\t";
+			cout << endl;
+		}
 	};
 
 	Graph() {};
@@ -113,8 +177,8 @@ public:
 	void *operator new(std::size_t) = delete; // Удаляем операторы new
 	void *operator new[](std::size_t) = delete; //
 
-	Nodes nodes;
-	Verges verges;
+	Nodes nodes {this};
+	Verges verges {this};
 
 
 };
@@ -125,19 +189,26 @@ int main()
 {
 	Graph G;
 
-	G.nodes.Add(3);
-	G.nodes.Add(1);
-	G.nodes.Add(1);
-	G.nodes.Add(5);
-	G.nodes.Add(2);
+	G.nodes.Add(3, 300);
+	G.nodes.Add(1, 100);
+	G.nodes.Add(1, 1000);
+	G.nodes.Add(5, 500);
+	G.nodes.Add(2, 200);
 	G.nodes.Del(2);
-
 	G.nodes.Print();
 
+	G.nodes(1)->weight = 1100;
+	G.nodes(11)->weight = 1111;
+	G.nodes.Print();
+
+	G.verges.Add(1, 3, 103);
+	G.verges.Add(1, 5, 105);
+	G.verges(22, 33)->verge_weight = 333;;
+	G.verges.Print();
 
 
 	// The end
-	cout << endl << "\n\nEnter x to exit...";
+	cout << endl << "\n\nEnter to exit...";
 	cin.get();
 }
 
