@@ -4,12 +4,15 @@
 #include <algorithm>
 #include <map>
 #include <iterator> 
+#include <limits>
 
 using namespace std;
 
 class Graph {
 
 public:
+
+	static const auto Inf = INT_MAX;
 
 	class Node {
 	public:
@@ -32,8 +35,8 @@ public:
 	public:
 		Node::Ptr A; // Указатель на первую вершину
 		Node::Ptr B; // Указатель на вторую вершину
-		double verge_weight; // Вес ребра
-		Verge(Node::Ptr A, Node::Ptr B, double weight = 0) : A(A), B(B), verge_weight(weight) { }; // Конструктор
+		double weight; // Вес ребра
+		Verge(Node::Ptr A, Node::Ptr B, double weight = 0) : A(A), B(B), weight(weight) { }; // Конструктор
 		bool operator < (const Verge & second) {
 			return (A->index < second.A->index)
 				|| (A->index == second.A->index
@@ -62,7 +65,8 @@ public:
 	public:
 		Nodes(Graph *owner): owner(owner) {};
 		~Nodes() { _nodes.clear(); };
-		
+		list<Node::Ptr> *List() { return &_nodes; };
+
 		Node::Ptr Get(int idx) { 
 			Node::Ptr p;
 			for (auto &it : _nodes)
@@ -166,7 +170,7 @@ public:
 
 		void Print() {
 			for (const auto &it : _verges)
-				cout << "(" << it->A->index << ")-(" << it->B->index << ")[" << it->verge_weight << "]\t";
+				cout << "(" << it->A->index << ")-(" << it->B->index << ")[" << it->weight << "]\t";
 			cout << endl;
 		}
 	};
@@ -180,6 +184,39 @@ public:
 	Nodes nodes {this};
 	Verges verges {this};
 
+
+
+	using ConnMap = std::map<int, std::map<int, double>>;
+	ConnMap _conn_map; // Матрица смежности. _conn_map[i] - map<i, weight>
+
+	void _re_map() {
+		_conn_map.clear();
+		for (const auto &n_col : *nodes.List())
+			for (const auto &n_row : *nodes.List()) {
+				auto v = verges.Get(n_col->index, n_row->index);
+				if (v)
+					_conn_map[n_col->index][n_row->index] = v->weight;
+				else
+					_conn_map[n_col->index][n_row->index] = Inf;  // Infinity
+			}
+	};
+
+	void Print_Connectivity_Matrix() { // Выводим граф в виде матрицы смежности
+		_re_map();
+		// Header:
+		cout << "[ ]\t";
+		for (auto iter : _conn_map)
+			cout << "[" << iter.first << "]\t";
+		cout << endl;
+		// Rows:
+		for (auto iter : _conn_map) {
+			cout << "[" << iter.first << "]\t";
+			for (auto iter2 : iter.second) {
+				(iter2.second == Inf) ? cout << "-\t" : cout << iter2.second << "\t";
+			}
+			cout << endl;
+		}
+	}
 
 };
 
@@ -203,9 +240,10 @@ int main()
 
 	G.verges.Add(1, 3, 103);
 	G.verges.Add(1, 5, 105);
-	G.verges(22, 33)->verge_weight = 333;;
+	G.verges(22, 33)->weight = 333;;
 	G.verges.Print();
 
+	G.Print_Connectivity_Matrix();
 
 	// The end
 	cout << endl << "\n\nEnter to exit...";
