@@ -1,10 +1,14 @@
+/*
+#include <limits>
 #include <memory>
 #include <iostream>
 #include <list>   
-#include <algorithm>
 #include <map>
+#include <set>
+#include <unordered_set>
 #include <iterator> 
-#include <limits>
+
+#include <algorithm>
 
 using namespace std;
 
@@ -18,14 +22,13 @@ public:
 	public:
 		int index; // Номер вершины
 		double weight; // Вес вершины
-		Node(int idx, double weight = 0) : index(idx), weight(weight) { }; // Конструктор, по умолчанию вес вершины = 0
+		int level; // Уровень вершины (для алгоритма Демукрона)
+		Node(int idx, double weight = 0) : index(idx), weight(weight), level(-1) { }; // Конструктор, по умолчанию вес вершины = 0, уровень = -1
 		bool operator < (const Node & second) { return index < second.index; }; // Оператор < сравнения вершин по номеру
 		bool operator == (const Node & second) { return index == second.index; }; // Оператор == сравнения вершин по номеру
 		using Ptr = shared_ptr<Node>;
-		struct Comparator
-		{
-			bool operator() (const Ptr &lhs, const Ptr &rhs) const
-			{
+		struct Comparator {
+			bool operator() (const Ptr &lhs, const Ptr &rhs) const {
 				return lhs->index < rhs->index;
 			}
 		};
@@ -38,22 +41,15 @@ public:
 		double weight; // Вес ребра
 		Verge(Node::Ptr A, Node::Ptr B, double weight = 0) : A(A), B(B), weight(weight) { }; // Конструктор
 		bool operator < (const Verge & second) {
-			return (A->index < second.A->index)
-				|| (A->index == second.A->index
-					&& B->index < second.B->index);
+			return (A->index < second.A->index) || (A->index == second.A->index && B->index < second.B->index);
 		};
 		bool operator == (const Verge & second) {
-			return A->index == second.A->index
-				&& B->index == second.B->index;
+			return A->index == second.A->index && B->index == second.B->index;
 		};
 		using Ptr = shared_ptr<Verge>;
-		struct Comparator
-		{
-			bool operator() (const Ptr &lhs, const Ptr &rhs) const
-			{
-				return (lhs->A->index < rhs->A->index)
-					|| (lhs->A->index == rhs->A->index
-						&& lhs->B->index < rhs->B->index);
+		struct Comparator {
+			bool operator() (const Ptr &lhs, const Ptr &rhs) const {
+				return (lhs->A->index < rhs->A->index) || (lhs->A->index == rhs->A->index && lhs->B->index < rhs->B->index);
 			};
 		};
 	};
@@ -117,7 +113,8 @@ public:
 
 	class Verges {
 	private:
-		list<Verge::Ptr> _verges;
+		//list<Verge::Ptr> _verges;
+		set<Verge::Ptr, Verge::Comparator> _verges;
 		Graph *owner;
 	public:
 		Verges(Graph *owner) : owner(owner) {};
@@ -126,8 +123,9 @@ public:
 		bool Add(int A_idx, int B_idx, double weight = 0) {
 			Node::Ptr sp_A = owner->nodes(A_idx);
 			Node::Ptr sp_B = owner->nodes(B_idx);
-			_verges.push_back(make_shared<Verge>(sp_A, sp_B, weight));
-			_verges.sort(Verge::Comparator());
+			//_verges.push_back(make_shared<Verge>(sp_A, sp_B, weight));
+			//_verges.sort(Verge::Comparator());
+			_verges.insert(make_shared<Verge>(sp_A, sp_B, weight));
 			return true; //????????????????????????????????????????
 		}
 
@@ -144,8 +142,9 @@ public:
 			Verge::Ptr sp = Get(A_idx, B_idx);
 			if (!sp) {
 				sp.reset(new Verge { owner->nodes(A_idx), owner->nodes(B_idx) });
-				_verges.push_back(sp);
-				_verges.sort(Verge::Comparator());
+				//_verges.push_back(sp);
+				//_verges.sort(Verge::Comparator());
+				_verges.insert(sp);
 			}
 			return sp;
 		}
@@ -154,7 +153,8 @@ public:
 		bool Del(int A_idx, int B_idx) {
 			for (auto &it : _verges) {
 				if (it->A->index == A_idx && it->B->index == B_idx) {
-					_verges.remove(it);
+					//_verges.remove(it);
+					_verges.erase(it);
 					return true;
 				}
 			}
@@ -221,6 +221,8 @@ public:
 };
 
 
+*/
+#include "Graph.h"
 
 int main()
 {
