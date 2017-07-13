@@ -3,13 +3,13 @@
 #include <limits>
 #include <memory>
 #include <iostream>
-#include <list>   
-#include <map>
+//#include <list>   
+#include <unordered_map>
 #include <set>
-#include <unordered_set>
-#include <iterator> 
+//#include <unordered_set>
 
-#include <algorithm>
+//#include <iterator> 
+//#include <algorithm>
 
 using namespace std;
 
@@ -58,13 +58,15 @@ public:
 	class Nodes {
 	private:
 		Graph *owner;
-		list<Node::Ptr> _nodes;
+		//list<Node::Ptr> _nodes;
+		set<Node::Ptr, Node::Comparator> _nodes;
 	public:
 		Nodes(Graph *owner) : owner(owner) {};
 		~Nodes() { _nodes.clear(); };
-		list<Node::Ptr> *List() { return &_nodes; };
+		//list<Node::Ptr> *List() { return &_nodes; };
+		set<Node::Ptr, Node::Comparator> *Set() { return &_nodes; };
 		Node::Ptr Get(int idx);
-		//Node::Ptr operator[](int idx) {
+		//Node::Ptr operator[](int idx);
 		Node::Ptr operator()(int idx);
 		bool Add(int idx, double);
 		bool Del(int idx);
@@ -87,21 +89,25 @@ public:
 		void Print();
 	};
 
+public:
+	
 	Graph() {};
 	Graph(Graph const &G) = delete; // Удаляем конструктор копирования
 	Graph(Graph &&G) = delete; // Удаляем конструктор перемещения
 	void *operator new(std::size_t) = delete; // Удаляем операторы new
 	void *operator new[](std::size_t) = delete; //
 
-	Nodes nodes{ this };
-	Verges verges{ this };
+	Nodes nodes { this };
+	Verges verges { this };
 
-	using ConnMap = std::map<int, std::map<int, double>>;
+private:
+
+	using ConnMap = std::unordered_map<int, std::unordered_map<int, double>>;
 	ConnMap _conn_map; // Матрица смежности. _conn_map[i] - map<i, weight>
-
 	void _re_map();
 
-	void Print_Connectivity_Matrix(); // Выводим граф в виде матрицы смежности
-		
+public:
+	
+	void Print_Connectivity_Matrix(); // Выводим граф в виде матрицы смежности	
 
 };

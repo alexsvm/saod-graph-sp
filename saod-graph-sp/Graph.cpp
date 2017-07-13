@@ -14,8 +14,9 @@ Graph::Node::Ptr Graph::Nodes::operator()(int idx) {
 	Graph::Node::Ptr sp = Get(idx);
 	if (!sp) {
 		sp.reset(new Node{ idx });
-		_nodes.push_back(sp);
-		_nodes.sort(Node::Comparator());
+		//_nodes.push_back(sp);
+		//_nodes.sort(Node::Comparator());
+		_nodes.insert(sp);
 	}
 	return sp;
 }
@@ -24,8 +25,9 @@ Graph::Node::Ptr Graph::Nodes::operator()(int idx) {
 bool Graph::Nodes::Add(int idx, double weight = 0) {
 	if (Get(idx))
 		return false;
-	_nodes.push_back(make_shared<Node>(idx, weight));
-	_nodes.sort(Node::Comparator());
+	//_nodes.push_back(make_shared<Node>(idx, weight));
+	//_nodes.sort(Node::Comparator());
+	_nodes.insert(make_shared<Node>(idx, weight));
 	return true;
 }
 
@@ -34,7 +36,8 @@ bool Graph::Nodes::Del(int idx) {
 		return false;
 	for (auto &it : _nodes)
 		if (it->index == idx) {
-			_nodes.remove(it);
+			//_nodes.remove(it);
+			_nodes.erase(it);
 			return true;
 		}
 	return false;
@@ -103,8 +106,10 @@ void Graph::Verges::Print() {
 
 void Graph::_re_map() {
 	_conn_map.clear();
-	for (const auto &n_col : *nodes.List())
-		for (const auto &n_row : *nodes.List()) {
+	//for (const auto &n_col : *nodes.List())
+	//	for (const auto &n_row : *nodes.List()) {
+	for (const auto &n_col : *nodes.Set())
+		for (const auto &n_row : *nodes.Set()) {
 			auto v = verges.Get(n_col->index, n_row->index);
 			if (v)
 				_conn_map[n_col->index][n_row->index] = v->weight;
