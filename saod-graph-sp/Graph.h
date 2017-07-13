@@ -24,7 +24,9 @@ public:
 		int index; // Номер вершины
 		double weight; // Вес вершины
 		int level; // Уровень вершины (для алгоритма Демукрона)
-		Node(int idx, double weight = 0) : index(idx), weight(weight), level(-1) { }; // Конструктор, по умолчанию вес вершины = 0, уровень = -1
+		int indeg; // Полустепень захода
+		int outdeg; // Полустепень исхода
+		Node(int idx, double weight = 0) : index(idx), weight(weight), level(-1), indeg(0), outdeg(0) { }; // Конструктор, по умолчанию вес вершины = 0, уровень = -1
 		bool operator < (const Node & second) { return index < second.index; }; // Оператор < сравнения вершин по номеру
 		bool operator == (const Node & second) { return index == second.index; }; // Оператор == сравнения вершин по номеру
 		using Ptr = shared_ptr<Node>;
@@ -70,6 +72,7 @@ public:
 		Node::Ptr operator()(int idx);
 		bool Add(int idx, double);
 		bool Del(int idx);
+		void ReCalcDegrees();
 		void Print();
 	};
 
@@ -81,11 +84,12 @@ public:
 	public:
 		Verges(Graph *owner) : owner(owner) {};
 		~Verges() { _verges.clear(); };
+		set<Verge::Ptr, Verge::Comparator> *Set() { return &_verges; };
 		bool Add(int A_idx, int B_idx, double weight);
 		Verge::Ptr Get(int A_idx, int B_idx);
 		Verge::Ptr operator()(int A_idx, int B_idx);
 		bool Del(int A_idx, int B_idx);
-		bool IsNodeIncluded(int idx);
+		bool IsNodeLinked(int idx);
 		void Print();
 	};
 
@@ -109,5 +113,5 @@ private:
 public:
 	
 	void Print_Connectivity_Matrix(); // Выводим граф в виде матрицы смежности	
-
+	void ReCalcNodesLevels();
 };

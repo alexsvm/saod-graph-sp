@@ -239,11 +239,20 @@ int main()
 	G.nodes(1)->weight = 1100;
 	G.nodes(11)->weight = 1111;
 	G.nodes.Print();
+	cout << endl;
 
 	G.verges.Add(1, 3, 103);
 	G.verges.Add(1, 5, 105);
-	G.verges(22, 33)->weight = 333;;
+	G.verges(22, 33)->weight = 333;
+	cout << endl;
+	
 	G.verges.Print();
+	G.nodes.Print();
+	cout << endl;
+
+	G.nodes.ReCalcDegrees();
+	G.nodes.Print();
+	cout << endl;
 
 	G.Print_Connectivity_Matrix();
 

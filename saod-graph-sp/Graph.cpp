@@ -32,7 +32,7 @@ bool Graph::Nodes::Add(int idx, double weight = 0) {
 }
 
 bool Graph::Nodes::Del(int idx) {
-	if (owner->verges.IsNodeIncluded(idx))
+	if (owner->verges.IsNodeLinked(idx))
 		return false;
 	for (auto &it : _nodes)
 		if (it->index == idx) {
@@ -43,9 +43,23 @@ bool Graph::Nodes::Del(int idx) {
 	return false;
 }
 
+void Graph::Nodes::ReCalcDegrees()
+{
+	for (auto &node : _nodes) {
+		node->indeg = 0;
+		node->outdeg = 0;
+		for (const auto &verge : *owner->verges.Set()) {
+			if (verge->A == node)
+				node->outdeg++;
+			if (verge->B == node)
+				node->indeg++;
+		}
+	}
+}
+
 void Graph::Nodes::Print() {
 	for (const auto &it : _nodes)
-		cout << it->index << "(" << it->weight << ")\t";
+		cout << it->index << "(" << it->weight << ", " << it->level << ", " << it->indeg << ", " << it->outdeg << ")\t";
 	cout << endl;
 }
 
@@ -54,6 +68,9 @@ void Graph::Nodes::Print() {
 bool Graph::Verges::Add(int A_idx, int B_idx, double weight = 0) {
 	Node::Ptr sp_A = owner->nodes(A_idx);
 	Node::Ptr sp_B = owner->nodes(B_idx);
+	// Увеличиваем полустепени захода и исхода у вершин
+	sp_A->outdeg++;
+	sp_B->indeg++;
 	//_verges.push_back(make_shared<Verge>(sp_A, sp_B, weight));
 	//_verges.sort(Verge::Comparator());
 	_verges.insert(make_shared<Verge>(sp_A, sp_B, weight));
@@ -77,6 +94,9 @@ Graph::Verge::Ptr Graph::Verges::operator()(int A_idx, int B_idx) {
 		//_verges.sort(Verge::Comparator());
 		_verges.insert(sp);
 	}
+	// Увеличиваем полустепени захода и исхода у вершин
+	sp->A->outdeg++;
+	sp->B->indeg++;
 	return sp;
 }
 
@@ -84,6 +104,9 @@ bool Graph::Verges::Del(int A_idx, int B_idx) {
 	for (auto &it : _verges) {
 		if (it->A->index == A_idx && it->B->index == B_idx) {
 			//_verges.remove(it);
+			// Уменьшаем полустепени захода и исхода у вершин A и B:
+			it->A->outdeg--;
+			it->B->indeg--;
 			_verges.erase(it);
 			return true;
 		}
@@ -91,7 +114,7 @@ bool Graph::Verges::Del(int A_idx, int B_idx) {
 	return false;
 }
 
-bool Graph::Verges::IsNodeIncluded(int idx) {
+bool Graph::Verges::IsNodeLinked(int idx) {
 	for (auto &it : _verges)
 		if (it->A->index == idx || it->B->index == idx)
 			return true;
@@ -133,5 +156,10 @@ void Graph::Print_Connectivity_Matrix() { // Выводим граф в виде матрицы смежнос
 		}
 		cout << endl;
 	}
+}
+
+void Graph::ReCalcNodesLevels()
+{
+
 }
 
