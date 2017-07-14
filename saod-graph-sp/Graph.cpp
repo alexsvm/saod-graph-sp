@@ -43,15 +43,28 @@ bool Graph::Nodes::Del(int idx) {
 	return false;
 }
 
+void Graph::Nodes::ReCalcDegrees(list<Node::Ptr> nodes, list<Verge::Ptr> verges) {
+	for (auto &node : nodes) {
+		node->indeg = 0;
+		node->outdeg = 0;
+		for (const auto &verge : verges) {
+			if (verge->A->index == node->index)
+				node->outdeg++;
+			if (verge->B->index == node->index)
+				node->indeg++;
+		}
+	}
+}
+
 void Graph::Nodes::ReCalcDegrees()
 {
 	for (auto &node : _nodes) {
 		node->indeg = 0;
 		node->outdeg = 0;
-		for (const auto &verge : *owner->verges.Set()) {
-			if (verge->A == node)
+		for (const auto &verge : *owner->verges.List()) {
+			if (verge->A->index == node->index)
 				node->outdeg++;
-			if (verge->B == node)
+			if (verge->B->index == node->index)
 				node->indeg++;
 		}
 	}
@@ -79,15 +92,23 @@ list<Graph::Node::Ptr> Graph::Nodes::Level(int level) {
 	return nlist;
 }
 
+list<Graph::Node::Ptr> Graph::Nodes::Nearby(int idx) {
+	list<Node::Ptr> nlist;
+	for (const auto &v : *owner->verges.List())
+		if (v->A->index == idx)
+			nlist.push_back(v->B);
+	return nlist;
+}
+
 bool Graph::Verges::Add(int A_idx, int B_idx, double weight = 0) {
 	Node::Ptr sp_A = owner->nodes(A_idx);
 	Node::Ptr sp_B = owner->nodes(B_idx);
 	// Увеличиваем полустепени захода и исхода у вершин
 	sp_A->outdeg++;
 	sp_B->indeg++;
-	//_verges.push_back(make_shared<Verge>(sp_A, sp_B, weight));
+	_verges.push_back(make_shared<Verge>(sp_A, sp_B, weight));
 	//_verges.sort(Verge::Comparator());
-	_verges.insert(make_shared<Verge>(sp_A, sp_B, weight));
+	//_verges.insert(make_shared<Verge>(sp_A, sp_B, weight));
 	return true; //????????????????????????????????????????
 }
 
@@ -104,9 +125,9 @@ Graph::Verge::Ptr Graph::Verges::operator()(int A_idx, int B_idx) {
 	Verge::Ptr sp = Get(A_idx, B_idx);
 	if (!sp) {
 		sp.reset(new Verge{ owner->nodes(A_idx), owner->nodes(B_idx) });
-		//_verges.push_back(sp);
+		_verges.push_back(sp);
 		//_verges.sort(Verge::Comparator());
-		_verges.insert(sp);
+		//_verges.insert(sp);
 	}
 	// Увеличиваем полустепени захода и исхода у вершин
 	sp->A->outdeg++;
@@ -121,7 +142,7 @@ bool Graph::Verges::Del(int A_idx, int B_idx) {
 			// Уменьшаем полустепени захода и исхода у вершин A и B:
 			it->A->outdeg--;
 			it->B->indeg--;
-			_verges.erase(it);
+			_verges.remove(it);
 			return true;
 		}
 	}
@@ -172,8 +193,28 @@ void Graph::Print_Connectivity_Matrix() { // Выводим граф в виде матрицы смежнос
 	}
 }
 
-void Graph::ReCalcNodesLevels()
-{
+void Graph::ReCalcNodesLevels() {
+	for (auto &it : *nodes.List()) it->level = -1; // clear levels for nodes
+	int cur_level = 0; 
+	list<Node::Ptr> n1{ *nodes.List() }; // make copy of nodes
+	list<Verge::Ptr> v1{ *verges.List() }; // make copy of verges
+	while (!n1.empty()) {
+		Nodes::ReCalcDegrees(n1, v1);
+		cout << "***" << endl;
+		Nodes::Print(n1);
+		cout << "***" << endl;
+		for (const auto &it : n1)
+			if (it->indeg == 0)
+				nodes(it->index)->level = cur_level;
+		n1.remove_if([](auto &n) { return (n->indeg == 0); });
+		v1.remove_if([](auto &v) { return (v->A->indeg == 0); });
+		++cur_level;
+	}
 
+	
 }
 
+
+bool Graph::dfs::operator()(int idx) {
+
+}

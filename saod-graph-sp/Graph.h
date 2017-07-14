@@ -78,24 +78,27 @@ public:
 		bool Add(int idx, double); // Добавляет в список узел с номером idx и весом (по умолчанию 0)
 		bool Del(int idx); // Удаляет из списка узел с номером idx
 		void ReCalcDegrees(); // Пересчитывает полустепени захода и выхода узлов
+		static void ReCalcDegrees(list<Node::Ptr> nodes, list<Verge::Ptr> verges);
 		void Print(); // Выводит список узлов в cout
 		static void Print(list<Node::Ptr> nodes);
 		template<class _Comparator>
 		void Sort(_Comparator Comparator) { // Сортирует список при помощи заданного функтора-компаратора
 			_nodes.sort(Comparator);
 		}
-		list<Node::Ptr> Level(int level);
+		list<Node::Ptr> Level(int level); // Возвращает новый список вершин  уровня level
+		list<Node::Ptr> Nearby(int idx); // Возвращает новый список вершин, смежных к вершине idx
 	};
 
 	class Verges {
 	private:
-		//list<Verge::Ptr> _verges; // Список лучше?
-		set<Verge::Ptr, Verge::Comparator> _verges;
+		list<Verge::Ptr> _verges; // Список лучше?
+		//set<Verge::Ptr, Verge::Comparator> _verges;
 		Graph *owner;
 	public:
 		Verges(Graph *owner) : owner(owner) {};
 		~Verges() { _verges.clear(); };
-		set<Verge::Ptr, Verge::Comparator> *Set() { return &_verges; };
+		//set<Verge::Ptr, Verge::Comparator> *Set() { return &_verges; };
+		list<Verge::Ptr> *List() { return &_verges; };
 		bool Add(int A_idx, int B_idx, double weight);
 		Verge::Ptr Get(int A_idx, int B_idx);
 		Verge::Ptr operator()(int A_idx, int B_idx);
@@ -125,4 +128,9 @@ public:
 	
 	void Print_Connectivity_Matrix(); // Выводим граф в виде матрицы смежности	
 	void ReCalcNodesLevels(); // Пересчет уровней узлов
+	
+	struct dfs {
+		bool operator () (int idx);
+	};
+
 };

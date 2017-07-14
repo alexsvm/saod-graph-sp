@@ -256,6 +256,25 @@ int main()
 	cout << endl;
 
 	G.Print_Connectivity_Matrix();
+	cout << endl;
+	cout << endl;
+	cout << "-------------------------------------------" << endl;
+
+	Graph G2;
+	G2.verges(1, 4)->weight = 1.0;
+	G2.verges(1, 5)->weight = 2.0;
+	G2.verges(3, 6)->weight = 3.0;
+	G2.verges(4, 7)->weight = 4.0;
+	G2.verges(5, 7)->weight = 5.0;
+	G2.verges(6, 7)->weight = 6.0;
+	G2.verges(6, 9)->weight = 7.0;
+	
+
+	G2.ReCalcNodesLevels();
+	cout << endl;
+	cout << "-------------------------------------------" << endl;;
+	G2.nodes.Print();
+
 
 	// The end
 	cout << endl << "\n\nEnter to exit...";
