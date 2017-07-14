@@ -214,7 +214,3 @@ void Graph::ReCalcNodesLevels() {
 	
 }
 
-
-bool Graph::dfs::operator()(int idx) {
-
-}

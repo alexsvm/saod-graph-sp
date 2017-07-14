@@ -6,6 +6,7 @@
 #include <list>   
 #include <unordered_map>
 #include <set>
+#include <stack>
 //#include <unordered_set>
 
 //#include <iterator> 
@@ -135,10 +136,50 @@ public:
 	void PrintConnectivityMatrix(); // Выводим граф в виде матрицы смежности	
 	void ReCalcNodesLevels(); // Пересчет уровней узлов
 	
+	enum Color {White = 0, Grey = 1, Black = 2};
+
 	struct dfs {
 		Graph *owner;
 		dfs(Graph *g): owner(g) {};
-		bool operator () (int idx);
+		unordered_map<int, Color> Colors;
+		list<int> List;
+
+		bool operator () (int idx) {
+			return DFS(idx);
+		}
+
+		bool topological_sort() {
+			bool Cycle;
+			for (const auto &it : *owner->nodes.List()) {
+				Cycle = DFS(it->index);
+				if (Cycle) 
+					return false;
+			}
+			return true;
+		}
+
+		bool DFS(int v) {
+			if (Colors[v] == Grey) 
+				return true;
+			if (Colors[v] == Black) 
+				return false;
+			Colors[v] = White;
+			for (const auto &it : owner->nodes.Nearby(v))
+				if (DFS(it->index)) 
+					return true;
+			List.push_front(v);
+			Colors[v] = Black;
+			return false;
+		}
+
+		void _print_stack() {
+			for (const auto &it : List)
+				cout << it << " ";
+			cout << endl;
+		}
+
 	};
 
 };
+//TODO : DFS
+//TODO : BFS

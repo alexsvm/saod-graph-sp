@@ -272,9 +272,13 @@ int main()
 
 	G2.ReCalcNodesLevels();
 	cout << endl;
-	cout << "-------------------------------------------" << endl;;
+	cout << "-------------------------------------------" << endl;
 	G2.nodes.Print();
-
+	cout << "===========================================" << endl;
+	Graph::dfs dfs2{ &G2 };
+	//cout << dfs2(1) << endl;
+	cout << dfs2.topological_sort() << endl;
+	dfs2._print_stack();
 
 	// The end
 	cout << endl << "\n\nEnter to exit...";
