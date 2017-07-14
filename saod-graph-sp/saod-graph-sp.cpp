@@ -255,7 +255,7 @@ int main()
 	G.nodes.Print();
 	cout << endl;
 
-	G.Print_Connectivity_Matrix();
+	G.PrintConnectivityMatrix();
 	cout << endl;
 	cout << endl;
 	cout << "-------------------------------------------" << endl;

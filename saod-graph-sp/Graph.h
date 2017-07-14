@@ -55,9 +55,11 @@ public:
 			return A->index == second.A->index && B->index == second.B->index;
 		}
 		using Ptr = shared_ptr<Verge>;
-		struct Comparator { // Функтор для сравнения ребер
+		struct Comparator { // Функтор для сравнения ребер по номерам вершин и весу ребер
 			bool operator() (const Ptr &lhs, const Ptr &rhs) const {
-				return (lhs->A->index < rhs->A->index) || (lhs->A->index == rhs->A->index && lhs->B->index < rhs->B->index);
+				return (lhs->A->index < rhs->A->index) 
+					|| (lhs->A->index == rhs->A->index && lhs->B->index < rhs->B->index)
+					|| (lhs->A->index == rhs->A->index && lhs->B->index == rhs->B->index) && lhs->B->weight == rhs->B->weight;
 			}
 		};
 	};
@@ -105,6 +107,10 @@ public:
 		bool Del(int A_idx, int B_idx);
 		bool IsNodeLinked(int idx);
 		void Print();
+		template<class _Comparator>
+		void Sort(_Comparator Comparator) { // Сортирует список при помощи заданного функтора-компаратора
+			_verges.sort(Comparator);
+		}
 	};
 
 public:
@@ -126,10 +132,12 @@ private:
 
 public:
 	
-	void Print_Connectivity_Matrix(); // Выводим граф в виде матрицы смежности	
+	void PrintConnectivityMatrix(); // Выводим граф в виде матрицы смежности	
 	void ReCalcNodesLevels(); // Пересчет уровней узлов
 	
 	struct dfs {
+		Graph *owner;
+		dfs(Graph *g): owner(g) {};
 		bool operator () (int idx);
 	};
 

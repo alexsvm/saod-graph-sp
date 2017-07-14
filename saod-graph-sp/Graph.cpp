@@ -176,7 +176,7 @@ void Graph::_re_map() {
 		}
 }
 
-void Graph::Print_Connectivity_Matrix() { // Выводим граф в виде матрицы смежности
+void Graph::PrintConnectivityMatrix() { // Выводим граф в виде матрицы смежности
 	_re_map();
 	// Print Header:
 	cout << "[ ]\t";
