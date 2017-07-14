@@ -3,7 +3,7 @@
 Graph::Node::Ptr Graph::Nodes::Get(int idx) {
 	Node::Ptr p;
 	for (auto &it : _nodes)
-		if ((*it).index == idx) {
+		if (it->index == idx) {
 			p = it;
 			return p;
 		};
@@ -14,9 +14,9 @@ Graph::Node::Ptr Graph::Nodes::operator()(int idx) {
 	Graph::Node::Ptr sp = Get(idx);
 	if (!sp) {
 		sp.reset(new Node{ idx });
-		//_nodes.push_back(sp);
-		//_nodes.sort(Node::Comparator());
-		_nodes.insert(sp);
+		_nodes.push_back(sp);
+		//_nodes.sort(Node::Comparator_());
+		//_nodes.insert(sp);
 	}
 	return sp;
 }
@@ -25,9 +25,9 @@ Graph::Node::Ptr Graph::Nodes::operator()(int idx) {
 bool Graph::Nodes::Add(int idx, double weight = 0) {
 	if (Get(idx))
 		return false;
-	//_nodes.push_back(make_shared<Node>(idx, weight));
+	_nodes.push_back(make_shared<Node>(idx, weight));
 	//_nodes.sort(Node::Comparator());
-	_nodes.insert(make_shared<Node>(idx, weight));
+	//_nodes.insert(make_shared<Node>(idx, weight));
 	return true;
 }
 
@@ -36,8 +36,8 @@ bool Graph::Nodes::Del(int idx) {
 		return false;
 	for (auto &it : _nodes)
 		if (it->index == idx) {
-			//_nodes.remove(it);
-			_nodes.erase(it);
+			_nodes.remove(it);
+			//_nodes.erase(it);
 			return true;
 		}
 	return false;
@@ -58,13 +58,27 @@ void Graph::Nodes::ReCalcDegrees()
 }
 
 void Graph::Nodes::Print() {
-	for (const auto &it : _nodes)
+	Print(_nodes);
+	//for (const auto &it : _nodes)
+	//	cout << it->index << "(" << it->weight << ", " << it->level << ", " << it->indeg << ", " << it->outdeg << ")\t";
+	//cout << endl;
+}
+
+void Graph::Nodes::Print(list<Node::Ptr> nodes)
+{
+	for (const auto &it : nodes)
 		cout << it->index << "(" << it->weight << ", " << it->level << ", " << it->indeg << ", " << it->outdeg << ")\t";
 	cout << endl;
 }
 
+list<Graph::Node::Ptr> Graph::Nodes::Level(int level) {
+	list<Graph::Node::Ptr> nlist;
+	for (const auto &it : _nodes)
+		if (it->level == level)
+			nlist.push_back(it);
+	return nlist;
+}
 
-	
 bool Graph::Verges::Add(int A_idx, int B_idx, double weight = 0) {
 	Node::Ptr sp_A = owner->nodes(A_idx);
 	Node::Ptr sp_B = owner->nodes(B_idx);
@@ -131,8 +145,8 @@ void Graph::_re_map() {
 	_conn_map.clear();
 	//for (const auto &n_col : *nodes.List())
 	//	for (const auto &n_row : *nodes.List()) {
-	for (const auto &n_col : *nodes.Set())
-		for (const auto &n_row : *nodes.Set()) {
+	for (const auto &n_col : *nodes.List())
+		for (const auto &n_row : *nodes.List()) {
 			auto v = verges.Get(n_col->index, n_row->index);
 			if (v)
 				_conn_map[n_col->index][n_row->index] = v->weight;
@@ -143,13 +157,13 @@ void Graph::_re_map() {
 
 void Graph::Print_Connectivity_Matrix() { // Выводим граф в виде матрицы смежности
 	_re_map();
-	// Header:
+	// Print Header:
 	cout << "[ ]\t";
-	for (auto iter : _conn_map)
+	for (auto &iter : _conn_map)
 		cout << "[" << iter.first << "]\t";
 	cout << endl;
-	// Rows:
-	for (auto iter : _conn_map) {
+	// Print Rows:
+	for (auto &iter : _conn_map) {
 		cout << "[" << iter.first << "]\t";
 		for (auto iter2 : iter.second) {
 			(iter2.second == Inf) ? cout << "-\t" : cout << iter2.second << "\t";

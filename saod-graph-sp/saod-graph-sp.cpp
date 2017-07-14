@@ -238,6 +238,7 @@ int main()
 
 	G.nodes(1)->weight = 1100;
 	G.nodes(11)->weight = 1111;
+	G.nodes.Sort(Graph::Node::Comparator_ByIndex());
 	G.nodes.Print();
 	cout << endl;
 

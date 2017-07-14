@@ -3,7 +3,7 @@
 #include <limits>
 #include <memory>
 #include <iostream>
-//#include <list>   
+#include <list>   
 #include <unordered_map>
 #include <set>
 //#include <unordered_set>
@@ -30,9 +30,14 @@ public:
 		bool operator < (const Node & second) { return index < second.index; }; // Оператор < сравнения вершин по номеру
 		bool operator == (const Node & second) { return index == second.index; }; // Оператор == сравнения вершин по номеру
 		using Ptr = shared_ptr<Node>;
-		struct Comparator {
+		struct Comparator_ByIndex { // Функтор для сравнения узлов по их номеру
 			bool operator() (const Ptr &lhs, const Ptr &rhs) const {
 				return lhs->index < rhs->index;
+			}
+		};
+		struct Comparator_ByLevel { // Функтор для сравнения узлов по их уровню
+			bool operator() (const Ptr &lhs, const Ptr &rhs) const {
+				return lhs->level < rhs->level;
 			}
 		};
 	};
@@ -43,42 +48,48 @@ public:
 		Node::Ptr B; // Указатель на вторую вершину
 		double weight; // Вес ребра
 		Verge(Node::Ptr A, Node::Ptr B, double weight = 0) : A(A), B(B), weight(weight) { }; // Конструктор
-		bool operator < (const Verge & second) {
+		bool operator < (const Verge & second) { // Оператор сравнения ребер по номерам вершин
 			return (A->index < second.A->index) || (A->index == second.A->index && B->index < second.B->index);
-		};
+		}
 		bool operator == (const Verge & second) {
 			return A->index == second.A->index && B->index == second.B->index;
-		};
+		}
 		using Ptr = shared_ptr<Verge>;
-		struct Comparator {
+		struct Comparator { // Функтор для сравнения ребер
 			bool operator() (const Ptr &lhs, const Ptr &rhs) const {
 				return (lhs->A->index < rhs->A->index) || (lhs->A->index == rhs->A->index && lhs->B->index < rhs->B->index);
-			};
+			}
 		};
 	};
 
 	class Nodes {
 	private:
 		Graph *owner;
-		//list<Node::Ptr> _nodes;
-		set<Node::Ptr, Node::Comparator> _nodes;
+		list<Node::Ptr> _nodes; // Лучше список - можно явно сортировать по номерам, уровням и пр.
+					//set<Node::Ptr, Node::Comparator_ByIndex> _nodes;
 	public:
 		Nodes(Graph *owner) : owner(owner) {};
 		~Nodes() { _nodes.clear(); };
-		//list<Node::Ptr> *List() { return &_nodes; };
-		set<Node::Ptr, Node::Comparator> *Set() { return &_nodes; };
-		Node::Ptr Get(int idx);
+		list<Node::Ptr> *List() { return &_nodes; };
+					//set<Node::Ptr, Node::Comparator_ByIndex> *Set() { return &_nodes; };
+		Node::Ptr Get(int idx); // Возращает SP ссылку на узел с номером idx
 		//Node::Ptr operator[](int idx);
-		Node::Ptr operator()(int idx);
-		bool Add(int idx, double);
-		bool Del(int idx);
-		void ReCalcDegrees();
-		void Print();
+		Node::Ptr operator()(int idx); // Оператор (idx) возвращает SP ссылку на узел с номером idx
+		bool Add(int idx, double); // Добавляет в список узел с номером idx и весом (по умолчанию 0)
+		bool Del(int idx); // Удаляет из списка узел с номером idx
+		void ReCalcDegrees(); // Пересчитывает полустепени захода и выхода узлов
+		void Print(); // Выводит список узлов в cout
+		static void Print(list<Node::Ptr> nodes);
+		template<class _Comparator>
+		void Sort(_Comparator Comparator) { // Сортирует список при помощи заданного функтора-компаратора
+			_nodes.sort(Comparator);
+		}
+		list<Node::Ptr> Level(int level);
 	};
 
 	class Verges {
 	private:
-		//list<Verge::Ptr> _verges;
+		//list<Verge::Ptr> _verges; // Список лучше?
 		set<Verge::Ptr, Verge::Comparator> _verges;
 		Graph *owner;
 	public:
@@ -113,5 +124,5 @@ private:
 public:
 	
 	void Print_Connectivity_Matrix(); // Выводим граф в виде матрицы смежности	
-	void ReCalcNodesLevels();
+	void ReCalcNodesLevels(); // Пересчет уровней узлов
 };
