@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <set>
 #include <stack>
+#include <queue>
 //#include <unordered_set>
 
 //#include <iterator> 
@@ -180,6 +181,48 @@ public:
 
 	};
 
+	struct bfs {
+		Graph *owner;
+		bfs(Graph *g) : owner(g) {};
+		unordered_map<int, Color> Colors;
+		unordered_map<int, double> Distance;
+		
+
+		void operator () (int idx) {
+			return BFS(idx);
+		}
+
+		
+		void BFS(int start) {
+			Distance.clear();
+			Colors.clear();
+			queue<int> q;
+			q.push(start);
+			Distance[start] = 0.0;
+			Colors[start] = White;
+			while (!q.empty()) {
+				int v = q.front();
+				q.pop();
+				for (const auto &it : owner->nodes.Nearby(v)) {
+					if (Colors[it->index] == White) {
+						Distance[it->index] = Distance[v] + owner->verges(v, it->index)->weight;
+						Colors[it->index] = Grey;
+						q.push(it->index);
+					}
+				}
+			}
+		}
+
+		void _print_Distance() {
+			//for (const auto &it : List)
+			//	cout << it << " ";
+			//cout << endl;
+			for (const auto &it : Distance) 
+				cout << it.first << "[" << it.second << "] ";
+			cout << endl;
+		}
+
+	};
 };
-//TODO : DFS
+
 //TODO : BFS

@@ -268,6 +268,10 @@ int main()
 	G2.verges(5, 7)->weight = 5.0;
 	G2.verges(6, 7)->weight = 6.0;
 	G2.verges(6, 9)->weight = 7.0;
+	G2.verges(11, 5)->weight = 8.0;
+	G2.verges(11, 12)->weight = 9.0;
+	G2.verges(9, 13)->weight = 10.0;
+	G2.verges(12, 13)->weight = 11.0;
 	
 
 	G2.ReCalcNodesLevels();
@@ -275,10 +279,14 @@ int main()
 	cout << "-------------------------------------------" << endl;
 	G2.nodes.Print();
 	cout << "===========================================" << endl;
-	Graph::dfs dfs2{ &G2 };
+	Graph::dfs dfs2 { &G2 };
 	//cout << dfs2(1) << endl;
 	cout << dfs2.topological_sort() << endl;
 	dfs2._print_stack();
+
+	Graph::bfs bfs1 { &G2 };
+	bfs1(11);
+	bfs1._print_Distance();
 
 	// The end
 	cout << endl << "\n\nEnter to exit...";
