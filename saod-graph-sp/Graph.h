@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <memory>
+#include <sstream>
 #include <iostream>
 #include <list>   
 #include <unordered_map>
@@ -223,6 +224,53 @@ public:
 		}
 
 	};
+
+	struct dijkstra {
+		Graph *owner;
+		dijkstra(Graph *g) : owner(g) {};
+
+		unordered_map<int, double> Distance;
+
+
+		void operator () (int idx) {
+			return Dijkstra(idx);
+		}
+
+
+		void Dijkstra(int start) {
+			for (const auto &it : *owner->nodes.List())
+				Distance[it->index] = Inf;
+			Distance[start] = 0.0;
+			set<pair<double, int>> q; // Distance, Node
+			for (const auto &it : Distance)
+				q.insert(make_pair(it.second, it.first));
+			while (!q.empty()) {
+				auto cur = *q.begin();
+				q.erase(q.begin());
+				for (const auto &it : owner->nodes.Nearby(cur.second))
+					if (Distance[it->index] > cur.first + owner->verges(cur.second, it->index)->weight) {
+						q.erase(make_pair(Distance[it->index], it->index));
+						Distance[it->index] = cur.first + owner->verges(cur.second, it->index)->weight;
+						q.insert(make_pair(Distance[it->index], it->index));
+					}
+			}
+		}
+
+		void _print_Distance() {
+			cout.fixed;
+			for (const auto &it : Distance) {
+				cout << it.first << "[";
+				if (it.second == Inf)
+					cout << "Inf";
+				else
+					cout << it.second;
+				cout << "] ";
+			}
+			cout << endl;
+		}
+
+	};
+
+
 };
 
-//TODO : BFS

@@ -281,12 +281,19 @@ int main()
 	cout << "===========================================" << endl;
 	Graph::dfs dfs2 { &G2 };
 	//cout << dfs2(1) << endl;
+	cout << "DFS demo:" << endl;
 	cout << dfs2.topological_sort() << endl;
 	dfs2._print_stack();
 
 	Graph::bfs bfs1 { &G2 };
 	bfs1(11);
+	cout << "BFS demo:" << endl;
 	bfs1._print_Distance();
+
+	Graph::dijkstra ds { &G2 };
+	ds(11);
+	cout << "Dijkstra demo:" << endl;
+	ds._print_Distance();
 
 	// The end
 	cout << endl << "\n\nEnter to exit...";
