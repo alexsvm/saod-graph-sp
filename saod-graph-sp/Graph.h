@@ -45,7 +45,7 @@ public:
 		};
 	};
 
-	class Verge {
+	class Verge { 
 	public:
 		Node::Ptr A; // ”казатель на первую вершину
 		Node::Ptr B; // ”казатель на вторую вершину
