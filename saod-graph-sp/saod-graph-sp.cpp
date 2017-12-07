@@ -278,6 +278,7 @@ int main()
 	cout << endl;
 	cout << "-------------------------------------------" << endl;
 	G2.nodes.Print();
+	G2.verges.Print();
 	cout << "===========================================" << endl;
 	Graph::dfs dfs2 { &G2 };
 	//cout << dfs2(1) << endl;
